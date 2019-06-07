@@ -21,7 +21,7 @@ productions = OrderedDict([
     ("R", [list("L"), list("L.L")]),
     ("L", [list("C"), list("CL")]),
     ("C", [list("0"), list("1"), list("2"), list("3"), list("4"), list("5"), list("6"), list("7"), list("8"), list("9")]),
-    ("O", [list("*"), list("),"), list("+"), list("-"), list("^")])
+    ("O", [list("*"), list(":"), list("+"), list("-"), list("^")])
 ])
 
 terminals = list(";().0123456789*,+-^ε")
@@ -91,10 +91,20 @@ def follow_of(name, called_by_prod=None):
     return list(nexts)
 
 def check_second_rule(name):
-    result = False
-    print(name, ": ", firsts[name])
-    print (name, ": ", follows[name])
-    return set(firsts[name]).isdisjoint(follows[name])
+    has_empty_sign = False
+    for exp in productions[name]:
+        if "ε" in exp:
+            has_empty_sign = True
+    if has_empty_sign:
+        print("Checking second rule for", name, ":", productions[name])
+        local_firsts = firsts[name].copy()
+        local_follows = follows[name].copy()
+
+        if "ε" in local_firsts: local_firsts.remove("ε")
+        if "ε" in local_follows: local_follows.remove("ε")
+
+        return set(local_firsts).isdisjoint(local_follows)
+    else: return True
 
 print_ordered_dict("Productions", productions)
 

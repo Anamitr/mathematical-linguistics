@@ -29,6 +29,8 @@ terminals = list(";().0123456789*,+-^ε")
 firsts = OrderedDict()
 first_rule_checks = OrderedDict()
 type_of_transforms = OrderedDict()
+follows = OrderedDict()
+second_rule_checks = OrderedDict()
 
 
 def print_ordered_dict(name, dict):
@@ -69,8 +71,30 @@ def refactor(name):
     expression = productions[name]
     repeatable_char = expression[0][0]
     productions[name] = [[repeatable_char,  name + "'"]]
-    productions[name + "'"] = [[word[1:] if word[1:] != [] else "ε" for word in expression]]
+    productions[name + "'"] = [word[1:] if word[1:] != [] else ["ε"] for word in expression]
 
+def follow_of(name, called_by_prod=None):
+    nexts = set([])
+    for prod in productions:
+        for exp in productions[prod]:
+            indices = [i for i, x in enumerate(exp) if x == name]
+            for index in indices:
+                if index + 1 >= len(exp):
+                    if prod != name and called_by_prod != prod:
+                        nexts.update(follow_of(prod, name))
+                else:
+                    if exp[index + 1] in terminals:
+                        nexts.update(exp[index + 1])
+                    else:
+                        nexts.update(first_of(exp[index + 1]))
+    # print("Follow of", name, ":", nexts)
+    return list(nexts)
+
+def check_second_rule(name):
+    result = False
+    print(name, ": ", firsts[name])
+    print (name, ": ", follows[name])
+    return set(firsts[name]).isdisjoint(follows[name])
 
 print_ordered_dict("Productions", productions)
 
@@ -80,6 +104,8 @@ print_ordered_dict("Firsts", firsts)
 [first_rule_checks.update({exp: check_first_rule(productions[exp])}) for exp in productions]
 print_ordered_dict("First rule", first_rule_checks)
 
+# [follows.update({name: follow_of(name)}) for name in productions]
+
 [refactor(name) for name in first_rule_checks if first_rule_checks[name] == False]
 print_ordered_dict("Productions after transforms", productions)
 
@@ -88,3 +114,10 @@ print_ordered_dict("Firsts", firsts)
 
 [first_rule_checks.update({exp: check_first_rule(productions[exp])}) for exp in productions]
 print_ordered_dict("First rule", first_rule_checks)
+
+[follows.update({name: follow_of(name)}) for name in productions]
+print_ordered_dict("\nFollows", follows)
+
+print()
+[second_rule_checks.update({name: check_second_rule(name)}) for name in productions]
+print_ordered_dict("Second rule", second_rule_checks)

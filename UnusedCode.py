@@ -30,3 +30,14 @@
 #     if list(first_rule_checks.items())[i][1] is False:
 #         check_type_of_transform(list(not_terminals.items())[i])
 #         transform(not_terminals[i])
+
+productions = OrderedDict([
+    ("S", [list("W;Z")]),
+    ("Z", [list("W;Z"), list("ε")]),
+    ("W", [list("P"), list("POW")]),
+    ("P", [list("R"), list("(W)")]),
+    ("R", [list("L"), list("L.L")]),
+    ("L", [list("C"), list("CL")]),
+    ("C", [list("0"), list("1"), list("2"), list("3"), list("4"), list("5"), list("6"), list("7"), list("8"), list("9")]),
+    ("O", [list("*"), list("),"), list("+"), list("-"), list("^")])
+])

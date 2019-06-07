@@ -2,15 +2,26 @@ from collections import OrderedDict
 
 print("Analizator składniowy")
 
+# productions = OrderedDict([
+#     ("S", ["W;Z"]),
+#     ("Z", ["W;Z", "ε"]),
+#     ("W", ["P", "POW"]),
+#     ("P", ["R", "(W)"]),
+#     ("R", ["L", "L.L"]),
+#     ("L", ["C", "CL"]),
+#     ("C", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]),
+#     ("O", ["*", ",", "+", "-", "^"])
+# ])
+
 productions = OrderedDict([
-    ("S", ["W;Z"]),
-    ("Z", ["W;Z", "ε"]),
-    ("W", ["P", "POW"]),
-    ("P", ["R", "(W)"]),
-    ("R", ["L", "L.L"]),
-    ("L", ["C", "CL"]),
-    ("C", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]),
-    ("O", ["*", ",", "+", "-", "^"])
+    ("S", [list("W;Z")]),
+    ("Z", [list("W;Z"), list("ε")]),
+    ("W", [list("P"), list("POW")]),
+    ("P", [list("R"), list("(W)")]),
+    ("R", [list("L"), list("L.L")]),
+    ("L", [list("C"), list("CL")]),
+    ("C", [list("0"), list("1"), list("2"), list("3"), list("4"), list("5"), list("6"), list("7"), list("8"), list("9")]),
+    ("O", [list("*"), list("),"), list("+"), list("-"), list("^")])
 ])
 
 terminals = list(";().0123456789*,+-^ε")
@@ -57,8 +68,8 @@ def check_first_rule(expression):
 def refactor(name):
     expression = productions[name]
     repeatable_char = expression[0][0]
-    productions[name] = [repeatable_char + name + "'"]
-    productions[name + "'"] = [word[1:] if word[1:] != "" else "ε" for word in expression]
+    productions[name] = [[repeatable_char,  name + "'"]]
+    productions[name + "'"] = [[word[1:] if word[1:] != [] else "ε" for word in expression]]
 
 
 print_ordered_dict("Productions", productions)
@@ -71,3 +82,9 @@ print_ordered_dict("First rule", first_rule_checks)
 
 [refactor(name) for name in first_rule_checks if first_rule_checks[name] == False]
 print_ordered_dict("Productions after transforms", productions)
+
+[firsts.update({name: first_of(name)}) for name in productions]
+print_ordered_dict("Firsts", firsts)
+
+[first_rule_checks.update({exp: check_first_rule(productions[exp])}) for exp in productions]
+print_ordered_dict("First rule", first_rule_checks)

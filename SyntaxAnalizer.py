@@ -9,7 +9,8 @@ productions = OrderedDict([
     ("P", [list("R"), list("(W)")]),
     ("R", [list("L"), list("L.L")]),
     ("L", [list("C"), list("CL")]),
-    ("C", [list("0"), list("1"), list("2"), list("3"), list("4"), list("5"), list("6"), list("7"), list("8"), list("9")]),
+    ("C",
+     [list("0"), list("1"), list("2"), list("3"), list("4"), list("5"), list("6"), list("7"), list("8"), list("9")]),
     ("O", [list("*"), list(":"), list("+"), list("-"), list("^")])
 ])
 
@@ -59,8 +60,9 @@ def check_first_rule(expression):
 def refactor(name):
     expression = productions[name]
     repeatable_char = expression[0][0]
-    productions[name] = [[repeatable_char,  name + "'"]]
+    productions[name] = [[repeatable_char, name + "'"]]
     productions[name + "'"] = [word[1:] if word[1:] != [] else ["ε"] for word in expression]
+
 
 def follow_of(name, called_by_prod=None):
     nexts = set([])
@@ -78,6 +80,7 @@ def follow_of(name, called_by_prod=None):
                         nexts.update(first_of(exp[index + 1]))
     return list(nexts)
 
+
 def check_second_rule(name):
     has_empty_sign = False
     for exp in productions[name]:
@@ -92,14 +95,17 @@ def check_second_rule(name):
         if "ε" in local_follows: local_follows.remove("ε")
 
         return set(local_firsts).isdisjoint(local_follows)
-    else: return True
+    else:
+        return True
+
 
 print_ordered_dict("Productions", productions)
 
 [firsts.update({name: first_of(name)}) for name in productions]
 print_ordered_dict("Firsts", firsts)
 
-[first_rule_checks.update({final_expression: check_first_rule(productions[final_expression])}) for final_expression in productions]
+[first_rule_checks.update({final_expression: check_first_rule(productions[final_expression])}) for final_expression in
+ productions]
 print_ordered_dict("First rule", first_rule_checks)
 
 # [follows.update({name: follow_of(name)}) for name in productions]
@@ -110,7 +116,8 @@ print_ordered_dict("Productions after transforms", productions)
 [firsts.update({name: first_of(name)}) for name in productions]
 print_ordered_dict("Firsts", firsts)
 
-[first_rule_checks.update({final_expression: check_first_rule(productions[final_expression])}) for final_expression in productions]
+[first_rule_checks.update({final_expression: check_first_rule(productions[final_expression])}) for final_expression in
+ productions]
 print_ordered_dict("First rule", first_rule_checks)
 
 [follows.update({name: follow_of(name)}) for name in productions]
@@ -122,28 +129,31 @@ print_ordered_dict("Second rule", second_rule_checks)
 
 counter = 0
 exp_build = ""
-def analize_syntax(exp, words_to_check):
-    global exp_build
+word_to_check = "(1.2*3)+5-(23.4+3)^3;8:13;"
+
+
+def analize_syntax(exp):
+    global exp_build, word_to_check
 
     for word in exp:
-        if word in terminals and word == words_to_check[analize_syntax.counter]:
+        if word in terminals and word == word_to_check[analize_syntax.counter]:
             analize_syntax.counter += 1
             exp_build += word
         elif word[0] in terminals:
-            if word[0] == words_to_check[analize_syntax.counter]:
-                analize_syntax(word, words_to_check)
+            if word[0] == word_to_check[analize_syntax.counter]:
+                analize_syntax(word)
         elif not isinstance(word, list):
-            if word in productions and words_to_check[analize_syntax.counter] in first_of(word):
-                analize_syntax(productions[word], words_to_check)
+            if word in productions and word_to_check[analize_syntax.counter] in first_of(word):
+                analize_syntax(productions[word])
                 continue
-        elif words_to_check[analize_syntax.counter] in first_of(word[0]):
-            analize_syntax(word, words_to_check)
+        elif word_to_check[analize_syntax.counter] in first_of(word[0]):
+            analize_syntax(word)
+
 
 analize_syntax.counter = 0
-word_to_check = "(1.2*3)+5-(23.4+3)^3;8:13;"
 
 try:
-    analize_syntax(productions["S"], word_to_check)
+    analize_syntax(productions["S"])
 except IndexError:
     print("Koniec wyrażenia")
 

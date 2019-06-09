@@ -2,17 +2,6 @@ from collections import OrderedDict
 
 print("Analizator składniowy")
 
-# productions = OrderedDict([
-#     ("S", ["W;Z"]),
-#     ("Z", ["W;Z", "ε"]),
-#     ("W", ["P", "POW"]),
-#     ("P", ["R", "(W)"]),
-#     ("R", ["L", "L.L"]),
-#     ("L", ["C", "CL"]),
-#     ("C", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]),
-#     ("O", ["*", ",", "+", "-", "^"])
-# ])
-
 productions = OrderedDict([
     ("S", [list("W;Z")]),
     ("Z", [list("W;Z"), list("ε")]),
@@ -87,7 +76,6 @@ def follow_of(name, called_by_prod=None):
                         nexts.update(exp[index + 1])
                     else:
                         nexts.update(first_of(exp[index + 1]))
-    # print("Follow of", name, ":", nexts)
     return list(nexts)
 
 def check_second_rule(name):
@@ -141,24 +129,16 @@ def analize_syntax(exp, words_to_check):
         if word in terminals and word == words_to_check[analize_syntax.counter]:
             analize_syntax.counter += 1
             exp_build += word
-            # if word == "ε":
-            # if konrad.counter >= len(words_to_check):
-            #     raise Exception("End of analysis")
-            # return True
         elif word[0] in terminals:
             if word[0] == words_to_check[analize_syntax.counter]:
-                # print("Konrad:", word[0])
-                is_it_this = analize_syntax(word, words_to_check)
-                # if is_it_this:
-                #     break
+                analize_syntax(word, words_to_check)
         elif not isinstance(word, list):
             if word in productions and words_to_check[analize_syntax.counter] in first_of(word):
                 analize_syntax(productions[word], words_to_check)
                 continue
         elif words_to_check[analize_syntax.counter] in first_of(word[0]):
             analize_syntax(word, words_to_check)
-        pass
-    pass
+
 analize_syntax.counter = 0
 word_to_check = "(1.2*3)+5-(23.4+3)^3;8:13;"
 

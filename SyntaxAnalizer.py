@@ -21,7 +21,7 @@ productions = OrderedDict([
     ("R", [list("L"), list("L.L")]),
     ("L", [list("C"), list("CL")]),
     ("C", [list("0"), list("1"), list("2"), list("3"), list("4"), list("5"), list("6"), list("7"), list("8"), list("9")]),
-    ("O", [list("*"), list(":"), list("+"), list("-"), list("^")])
+    ("O", [list("*"), list(";"), list("+"), list("-"), list("^")])
 ])
 
 terminals = list(";().0123456789*,+-^ε")
@@ -111,7 +111,7 @@ print_ordered_dict("Productions", productions)
 [firsts.update({name: first_of(name)}) for name in productions]
 print_ordered_dict("Firsts", firsts)
 
-[first_rule_checks.update({exp: check_first_rule(productions[exp])}) for exp in productions]
+[first_rule_checks.update({final_expression: check_first_rule(productions[final_expression])}) for final_expression in productions]
 print_ordered_dict("First rule", first_rule_checks)
 
 # [follows.update({name: follow_of(name)}) for name in productions]
@@ -122,7 +122,7 @@ print_ordered_dict("Productions after transforms", productions)
 [firsts.update({name: first_of(name)}) for name in productions]
 print_ordered_dict("Firsts", firsts)
 
-[first_rule_checks.update({exp: check_first_rule(productions[exp])}) for exp in productions]
+[first_rule_checks.update({final_expression: check_first_rule(productions[final_expression])}) for final_expression in productions]
 print_ordered_dict("First rule", first_rule_checks)
 
 [follows.update({name: follow_of(name)}) for name in productions]
@@ -131,3 +131,31 @@ print_ordered_dict("\nFollows", follows)
 print()
 [second_rule_checks.update({name: check_second_rule(name)}) for name in productions]
 print_ordered_dict("Second rule", second_rule_checks)
+
+counter = 0
+def konrad(exp, words_to_check):
+    for word in exp:
+        if word in terminals and word == words_to_check[konrad.counter]:
+            konrad.counter += 1
+            konrad.exp_build += word
+            continue
+        elif word[0] in terminals:
+            if word[0] == words_to_check[konrad.counter]:
+                print("Konrad:", word[0])
+                konrad(word, words_to_check)
+        elif not isinstance(word, list):
+            if word in productions and words_to_check[konrad.counter] in first_of(word):
+                konrad(productions[word], words_to_check)
+                continue
+        elif words_to_check[konrad.counter] in first_of(word[0]):
+            konrad(word, words_to_check)
+        pass
+    pass
+konrad.counter = 0
+konrad.exp_build = ""
+word_to_check = "(1.2*3)+5-(23.4+3)^3;8:13;"
+
+konrad(productions["S"], word_to_check)
+print(konrad.exp_build)
+
+# print("Final expression: ", final_expression)

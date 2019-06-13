@@ -29,6 +29,8 @@ def print_ordered_dict(name, dict):
 
 
 def first_of(name):
+    if name in terminals:
+        return name
     result = []
     expression = productions[name]
     for word in expression:
@@ -130,24 +132,28 @@ print_ordered_dict("Second rule", second_rule_checks)
 counter = 0
 exp_build = ""
 word_to_check = "(1.2*3)+5-(23.4+3)^3;8:13;"
+# word_to_check = "(()"
 
 
-def analize_syntax(exp):
+def analize_syntax(exp, is_mandatory=False):
     global exp_build, word_to_check
 
     for word in exp:
         if word in terminals and word == word_to_check[analize_syntax.counter]:
             analize_syntax.counter += 1
             exp_build += word
-        elif word[0] in terminals:
-            if word[0] == word_to_check[analize_syntax.counter]:
-                analize_syntax(word)
-        elif not isinstance(word, list):
-            if word in productions and word_to_check[analize_syntax.counter] in first_of(word):
+        elif not isinstance(word, list) and word in productions and word_to_check[analize_syntax.counter] in first_of(word):
+            # if :
                 analize_syntax(productions[word])
                 continue
         elif word_to_check[analize_syntax.counter] in first_of(word[0]):
-            analize_syntax(word)
+            # for char in word:
+                analize_syntax(word, True)
+        elif is_mandatory:
+            print(word, "not found")
+
+        # else:
+        #     return False
 
 
 analize_syntax.counter = 0

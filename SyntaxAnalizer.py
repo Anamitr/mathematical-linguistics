@@ -16,6 +16,10 @@ productions = OrderedDict([
 
 terminals = list(";().0123456789*,+-^ε:")
 
+class IncorrectGrammarException(Exception):
+   """Raised when the grammar is incorrect"""
+   pass
+
 firsts = OrderedDict()
 first_rule_checks = OrderedDict()
 type_of_transforms = OrderedDict()
@@ -132,38 +136,52 @@ print_ordered_dict("Second rule", second_rule_checks)
 counter = 0
 exp_build = ""
 word_to_check = "(1.2*3)+5-(23.4+3)^3;8:13;"
-# word_to_check = "(()"
+# word_to_check = "(3)"
 
 
 def analize_syntax(exp, is_mandatory=False):
     global exp_build, word_to_check
+    # print("Exp = ", exp)
+
+    result = True
 
     for word in exp:
-        if word in terminals and word == word_to_check[analize_syntax.counter]:
+        char_to_check = word_to_check[analize_syntax.counter] if analize_syntax.counter < len(word_to_check) else "ε"
+        if word in terminals and word == char_to_check:
             analize_syntax.counter += 1
-            exp_build += word
-        elif not isinstance(word, list) and word in productions and word_to_check[analize_syntax.counter] in first_of(word):
+            if word != "ε":
+                exp_build += word
+            # print(exp_build)
+        elif not isinstance(word, list) and word in productions and char_to_check in first_of(word):
             # if :
                 analize_syntax(productions[word])
-                continue
-        elif word_to_check[analize_syntax.counter] in first_of(word[0]):
+        elif isinstance(word, list) and char_to_check in first_of(word[0]):
             # for char in word:
-                analize_syntax(word, True)
-        elif is_mandatory:
-            print(word, "not found")
+            is_valid = analize_syntax(word, True)
+            if not is_valid:
+                raise IncorrectGrammarException
+        elif is_mandatory and (word in terminals or ["ε"] not in productions[word]):
+            result = False
+            # print(word, "not found")
 
-        # else:
-        #     return False
+    return result
 
 
 analize_syntax.counter = 0
 
+is_correct = True
 try:
     analize_syntax(productions["S"])
-except IndexError:
-    print("Koniec wyrażenia")
+except IncorrectGrammarException:
+    is_correct = False
+    print("IncorrectGrammarException")
 
-if exp_build == word_to_check:
-    print("Słowo:", word_to_check, "zgode z gramatyką")
+print("exp build = ", exp_build)
+
+if exp_build != word_to_check:
+    is_correct = False
+
+if is_correct:
+    print("\nSłowo:", word_to_check, "zgode z gramatyką")
 else:
-    print("Słowo:", word_to_check, "niezgodne z gramatyką")
+    print("\nSłowo:", word_to_check, "niezgodne z gramatyką")

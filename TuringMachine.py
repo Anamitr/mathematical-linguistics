@@ -35,7 +35,7 @@ def make_move(move):
 
 
 while True:
-    # print("i = ", i, ", current state = ", current_state, ", binary number = ", binary_number)
+    print("position = ", i, ", current state = ", current_state, ", binary number = ", binary_number)
     all_states.append(current_state)
     current_char = binary_number[i]
     if current_char == "ε":
@@ -44,7 +44,7 @@ while True:
         current_char = int(current_char)
 
     move = TRANSITION_TABLE[current_state][current_char]
-    # print(move)
+    print(move)
     make_move(move)
 
     if current_state in END_STATES:
